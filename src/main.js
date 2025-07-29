@@ -1,24 +1,45 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import * as THREE from 'three';
+import { Cubo } from './cubo.js';
+import { Camera } from './camera.js';
+import { Floor } from './floor.js';
+import { Player } from './player.js';
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const scene = new THREE.Scene();
 
-setupCounter(document.querySelector('#counter'))
+const cameraInstance = new Camera();
+const camera = cameraInstance.getCamera();
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Player
+const player = new Player(camera);
+scene.add(player.mesh);
+player.enableMouseLook();
+
+// Cubos
+const cubo = new Cubo(0x00ff00, { x: 0, y: 0, z: 0 });
+const cubo2 = new Cubo(0xff0000, { x: 10, y: 1, z: -10 });
+scene.add(cubo.mesh);
+scene.add(cubo2.mesh);
+
+// Chão
+const floor = new Floor(100, 0x808080);
+scene.add(floor.mesh);
+
+document.body.addEventListener('click', () => {
+  document.body.requestPointerLock();
+});
+
+
+// Animação
+function animate() {
+  cubo.update();
+  cubo2.update();
+  player.move();
+  player.updateCamera();
+  renderer.render(scene, camera);
+}
+
+renderer.setAnimationLoop(animate);
