@@ -7,11 +7,18 @@ export class Floor {
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.rotation.x = -Math.PI / 2;
         this.mesh.position.y = -2;
+        this.mesh.mass = 1000;
 
-        this.boundingBox = new THREE.Box3().set
+        // Colisão: criar a bounding box
+        this.boundingBox = new THREE.Box3().setFromObject(this.mesh);
     }
-    
-    colision() {
+
+    updateBoundingBox() {
         this.boundingBox.setFromObject(this.mesh);
-    };
+    }
+
+    checkCollision(object) {
+        const objectBox = new THREE.Box3().setFromObject(object);
+        return this.boundingBox.intersectsBox(objectBox);
+    }
 }

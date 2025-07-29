@@ -8,6 +8,8 @@ export class Player {
         this.mesh.position.set(0, 3, 0);
         this.camera = camera;
 
+        this.mesh.mass = 10;
+
         this.keys = {};
         window.addEventListener('keydown', (event) => {
             this.keys[event.key] = true;
@@ -56,7 +58,7 @@ export class Player {
         });
     }
 
-    updateCamera() {
+    updateCameraFps() {
         if (!this.camera) return;
     
         this.camera.position.copy(this.mesh.position);
@@ -69,6 +71,17 @@ export class Player {
 
         const lookTarget = this.mesh.position.clone().add(direction);
         this.camera.lookAt(lookTarget);
+    }
+
+    updateCamera() {
+        if (!this.camera) return;
+
+        // Posição fixa da câmera em relação ao player
+        const offset = new THREE.Vector3(-10, 10, -10); // você pode ajustar esses valores
+
+        const cameraPos = this.mesh.position.clone().add(offset);
+        this.camera.position.copy(cameraPos);
+        this.camera.lookAt(this.mesh.position);    
     }
 }
 

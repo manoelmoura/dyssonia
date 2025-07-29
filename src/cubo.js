@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { update } from 'three/examples/jsm/libs/tween.module.js';
 
 export class Cubo {
     constructor(color = 0xffffff, position = { x: 0, y: 0, z: 0 }) {
@@ -7,6 +6,7 @@ export class Cubo {
         this.material = new THREE.MeshBasicMaterial({ color });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.position.set(position.x, position.y, position.z);
+        this.mesh.mass = 1;
 
     }
 
