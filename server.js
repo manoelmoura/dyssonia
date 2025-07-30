@@ -1,59 +1,49 @@
-import express from 'express';
-import { createServer } from 'http';
 import { Server } from 'socket.io';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Ajustes para ESModules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { createServer } from 'http';
+import express from 'express';
+import { World } from './game/world.js';
+import { Player } from './game/player.js';
+import { Floor } from './game/floor.js';
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer);
+const io = new Server(httpServer, {cors: { origin: '*' } });
 
-// Serve a pasta "public"
-app.use(express.static(path.join(__dirname, 'public')));
+const world = new World();
 
-// Serve a pasta "src" pros módulos JS no navegador
-app.use('/src', express.static(path.join(__dirname, 'src')));
+const floor = new Floor('floor1', 0, -2, 0, 30);
+world.addObject(floor);
 
-const players = {};
+app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-  console.log('Novo cliente conectado:', socket.id);
+    console.log('Player connected:', socket.id);
 
-  // Cria jogador no servidor com posição inicial
-  players[socket.id] = {
-    x: 0,
-    y: 4,
-    z: 0,
-  };
+    const player = new Player(socket.id, `Player${socket.id}`);
+    world.addObject(player);
 
-  // Envia lista de jogadores já existentes para o novo jogador
-  socket.emit('initPlayers', players);
+    socket.on('input', input => {
+        const player = world.getObject(socket.id);
+        if (player) {
+            player.velocity.x = (input.x || 0) * player.speed;
+            player.velocity.z = (input.z || 0) * player.speed;
+            
+        }
+    });
 
-  // Avisa os outros que um novo jogador chegou
-  socket.broadcast.emit('newPlayer', { id: socket.id, pos: players[socket.id] });
-
-  // Recebe movimento do jogador e transmite para os outros
-  socket.on('playerMove', (pos) => {
-    if (players[socket.id]) {
-      players[socket.id] = pos;
-      socket.broadcast.emit('updatePlayer', { id: socket.id, pos });
-    }
-  });
-
-  // Quando jogador desconecta
-  socket.on('disconnect', () => {
-    console.log('Cliente desconectado:', socket.id);
-    delete players[socket.id];
-    socket.broadcast.emit('removePlayer', socket.id);
-  });
+    socket.on('disconnect', () => {
+        world.removeObject(socket.id);
+        console.log('Player disconnected:', socket.id);
+    });
 });
 
-// Inicia o servidor
+setInterval(() => {
+    world.update(1);
+    const state = world.getState();
+    io.emit('state', state);
+}, 1000 / 60);
+
 const PORT = 3000;
 httpServer.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
