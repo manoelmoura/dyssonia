@@ -1,11 +1,11 @@
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 export class Player {
     constructor(camera) {
         this.geometry = new THREE.CapsuleGeometry(0.5, 1, 10, 10, 10);
         this.material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.position.set(0, 3, 0);
+        this.mesh.position.set(0, 4, 0);
         this.camera = camera;
 
         this.mesh.mass = 2;

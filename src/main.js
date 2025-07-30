@@ -1,12 +1,12 @@
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import { Cubo } from './cubo.js';
 import { Camera } from './camera.js';
 import { Floor } from './floor.js';
 import { Player } from './player.js';
 import { gravity, collision } from './physics.js';
+import { initSocket } from './network/socket.js'; // <- aqui
 
 const scene = new THREE.Scene();
-
 const cameraInstance = new Camera();
 const camera = cameraInstance.getCamera();
 
@@ -17,22 +17,19 @@ document.body.appendChild(renderer.domElement);
 // Player
 const player = new Player(camera);
 scene.add(player.mesh);
-//player.enableMouseLook();
 
-// Cubos
-const cubo = new Cubo(0x00ff00, { x: 0, y: 0, z: 0 });
+// Cubos e chão
+const cubo = new Cubo(0x00ff00, { x: 0, y: 60, z: 10 });
 const cubo2 = new Cubo(0xff0000, { x: 10, y: 1, z: -10 });
 scene.add(cubo.mesh);
 scene.add(cubo2.mesh);
-
-// Chão
 const floor = new Floor(40, 0x40aa40);
 scene.add(floor.mesh);
 
+// Inicializa os sockets multiplayer
+initSocket(scene, player);
 
-
-
-// Animação
+// Loop
 function animate() {
   player.move();
   player.updateCamera();
@@ -41,5 +38,4 @@ function animate() {
   collision(player.mesh, cubo.mesh, cubo2.mesh, floor.mesh);
   renderer.render(scene, camera);
 }
-
 renderer.setAnimationLoop(animate);
