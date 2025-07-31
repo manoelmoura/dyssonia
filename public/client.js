@@ -6,6 +6,7 @@ import { Box } from './box.js';
 import { setupSocket, getSocketId, onServerState } from './socket.js';
 
 const scene = new THREE.Scene();
+window.gameScene = scene;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
@@ -44,7 +45,6 @@ scene.add(spotLightHelper);
 const shadowHelper = new THREE.CameraHelper(spotLight.shadow.camera);
 scene.add(shadowHelper);
 
-
 const gameObjects = new Map();
 let localPlayer = null;
 let cameraObj = null;
@@ -65,13 +65,19 @@ onServerState(state => {
                     cameraObj = new Camera(gameObject.getMesh());
                 }
             } else if (obj.type === 'floor') {
-                gameObject = new Floor(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0xccaacc); // Classe visual do floor
+                gameObject = new Floor(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0xccaacc);
             } else if (obj.type === 'box') {
                 gameObject = new Box(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0x742724);
             }
             
             if (gameObject) {
                 scene.add(gameObject.getMesh());
+                
+                // Adiciona sombra se for um player
+                if (obj.type === 'player' && gameObject.getShadowMesh) {
+                    scene.add(gameObject.getShadowMesh());
+                }
+                
                 gameObjects.set(obj.id, gameObject);
             }
         }
@@ -83,6 +89,12 @@ onServerState(state => {
     for (const [id, obj] of gameObjects) {
         if (!state.find(o => o.id === id)) {
             scene.remove(obj.getMesh());
+            
+            // Remove sombra se existir
+            if (obj.getShadowMesh) {
+                scene.remove(obj.getShadowMesh());
+            }
+            
             gameObjects.delete(id);
         }
     }
@@ -96,4 +108,3 @@ function animate() {
     }
 }
 animate();
-

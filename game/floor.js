@@ -9,7 +9,7 @@ export class Floor extends GameObject {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.sizeZ = sizeZ;
-        this.mass = Infinity;
+        this.mass = 100;
     }
 
     update(deltaTime) {

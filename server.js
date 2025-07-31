@@ -19,7 +19,6 @@ const gravitySystem = new GravitySystem();
 const floor = new Floor('floor1', 0, -1, 0, 30, 1, 30);
 world.addObject(floor);
 collisionSystem.addObject(floor);
-//gravitySystem.addObject(floor);
 
 const box = new Box('box1', 3, 10, 3, 3, 1, 1.5, 0.1);
 world.addObject(box);
@@ -44,31 +43,9 @@ io.on('connection', (socket) => {
     socket.on('input', input => {
         const player = world.getObject(socket.id);
         if (player) {
-            player.velocity.x = (input.x || 0) * player.speed;
-            player.velocity.z = (input.z || 0) * player.speed;
-
-            if (input.jump && isPlayerGrounded(player)) {
-                gravitySystem.makeObjectJump(player, 8);
-            }
-            
+            player.handleInput(input, collisionSystem, gravitySystem)
         }
     });
-
-    function isPlayerGrounded(player) {
-        const collisions = collisionSystem.getCollisionsFor(player);
-        
-        for (const obj of collisions) {
-            // Verifica se o objeto está abaixo do centro do player
-            const heightDifference = player.position.y - obj.position.y;
-            const minDistance = (player.sizeY + obj.sizeY) / 2;
-            
-            // Se estão colidindo e o objeto está embaixo
-            if (heightDifference > 0 && heightDifference <= minDistance) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     socket.on('disconnect', () => {
         world.removeObject(socket.id);

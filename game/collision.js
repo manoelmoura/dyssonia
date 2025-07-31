@@ -19,8 +19,6 @@ export class CollisionSystem {
         }
     }
 
-
-
     // Verifica colisão AABB entre dois objetos
     checkAABBCollision(obj1, obj2) {
         const halfSizeX1 = obj1.sizeX / 2;
@@ -84,31 +82,49 @@ export class CollisionSystem {
         if (overlapX <= overlapY && overlapX <= overlapZ) {
             // Resolve no eixo X
             const direction = deltaX > 0 ? 1 : -1;
-            
             this.resolveMassBasedSeparation(obj1, obj2, mass1, mass2, 'x', direction, overlapX);
             
         } else if (overlapY <= overlapX && overlapY <= overlapZ) {
             // Resolve no eixo Y
             const direction = deltaY > 0 ? 1 : -1;
-            
             this.resolveMassBasedSeparation(obj1, obj2, mass1, mass2, 'y', direction, overlapY);
+            
+            // Para colisões no eixo Y, zera a velocidade vertical dos objetos
+            if (mass1 < mass2) {
+                obj1.velocity.y = 0;
+            } else if (mass2 < mass1) {
+                obj2.velocity.y = 0;
+            } else {
+                obj1.velocity.y = 0;
+                obj2.velocity.y = 0;
+            }
             
         } else {
             // Resolve no eixo Z
             const direction = deltaZ > 0 ? 1 : -1;
-            
             this.resolveMassBasedSeparation(obj1, obj2, mass1, mass2, 'z', direction, overlapZ);
         }
     }
 
     // Resolve a separação baseada na massa
     resolveMassBasedSeparation(obj1, obj2, mass1, mass2, axis, direction, overlap) {
-        if (mass1 > mass2) {
-            // obj1 empurra obj2
+        if (mass1 === Infinity && mass2 === Infinity) {
+            // Ambos são imóveis - não resolve
+            return;
+        } else if (mass1 === Infinity) {
+            // obj1 é imóvel (como o chão), move apenas obj2
+            obj2.position[axis] += direction * overlap;
+            obj2.velocity[axis] = 0;
+        } else if (mass2 === Infinity) {
+            // obj2 é imóvel (como o chão), move apenas obj1
+            obj1.position[axis] -= direction * overlap;
+            obj1.velocity[axis] = 0;
+        } else if (mass1 > mass2) {
+            // obj1 é mais pesado, empurra obj2
             obj2.position[axis] += direction * overlap;
             obj2.velocity[axis] = 0;
         } else if (mass2 > mass1) {
-            // obj2 empurra obj1
+            // obj2 é mais pesado, empurra obj1
             obj1.position[axis] -= direction * overlap;
             obj1.velocity[axis] = 0;
         } else {
@@ -139,18 +155,6 @@ export class CollisionSystem {
         return collisions;
     }
 
-    // Método principal que deve ser chamado no game loop
-    update() {
-        const collisions = this.checkAllCollisions();
-        
-        // Resolve todas as colisões encontradas
-        collisions.forEach(collision => {
-            this.resolveCollision(collision.obj1, collision.obj2);
-        });
-        
-        return collisions; // Retorna para caso você queira fazer algo com as colisões
-    }
-
     // Verifica se um objeto específico está colidindo com algo
     getCollisionsFor(targetObject) {
         const collisions = [];
@@ -162,6 +166,58 @@ export class CollisionSystem {
         }
         
         return collisions;
+    }
+
+    // Método específico para verificar se um objeto está no chão
+    isObjectGrounded(targetObject, groundCheckDistance = 0.1) {
+        // Cria uma versão de teste do objeto ligeiramente abaixo
+        const testObject = {
+            ...targetObject,
+            position: {
+                x: targetObject.position.x,
+                y: targetObject.position.y - groundCheckDistance,
+                z: targetObject.position.z
+            }
+        };
+
+        for (const obj of this.collidableObjects) {
+            if (obj.id === targetObject.id) continue;
+            
+            if (this.checkAABBCollision(testObject, obj)) {
+                // Verifica se o objeto está realmente abaixo
+                const targetBottom = targetObject.position.y - (targetObject.sizeY / 2);
+                const objTop = obj.position.y + (obj.sizeY / 2);
+                
+                if (objTop <= targetBottom + groundCheckDistance) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    update() {
+        // Resolve colisões múltiplas vezes para lidar com colisões em cadeia
+        let iterations = 0;
+        const maxIterations = 5; // Evita loop infinito
+        
+        while (iterations < maxIterations) {
+            const collisions = this.checkAllCollisions();
+            
+            if (collisions.length === 0) {
+                break; // Não há mais colisões para resolver
+            }
+            
+            // Resolve todas as colisões encontradas
+            collisions.forEach(collision => {
+                this.resolveCollision(collision.obj1, collision.obj2);
+            });
+            
+            iterations++;
+        }
+        
+        return this.checkAllCollisions(); // Retorna colisões finais
     }
 
     // Limpa todos os objetos
