@@ -27,6 +27,7 @@ export function setupSocket() {
         const vertical = (keys['a'] ? 1 : 0) - (keys['d'] ? 1 : 0);
         input.x = (horizontal - vertical) * 0.707;
         input.z = (horizontal + vertical) * 0.707;
+        input.jump = keys[' '] || false;
 
         socket.emit('input', input);
     }, 1000 / 60);

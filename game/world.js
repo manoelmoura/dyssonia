@@ -32,7 +32,9 @@ export class World {
                 type: obj.type,
                 position: obj.position,
                 rotation: obj.rotation,
-                size: obj.size
+                sizeX: obj.sizeX,
+                sizeY: obj.sizeY,
+                sizeZ: obj.sizeZ
             });
         }
         return state;

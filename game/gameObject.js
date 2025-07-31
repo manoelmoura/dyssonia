@@ -5,7 +5,10 @@ export class GameObject {
         this.position = { x: 0, y: 0, z: 0 };
         this.velocity = { x: 0, y: 0, z: 0 };
         this.rotation = { x: 0, y: 0, z: 0 };
-        this.size = 1;
+        this.sizeX = 1;
+        this.sizeY = 1;
+        this.sizeZ = 1;
+        this.mass = 1;
     }
 
     update(deltaTime) {
