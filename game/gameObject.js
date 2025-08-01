@@ -9,6 +9,7 @@ export class GameObject {
         this.sizeY = 1;
         this.sizeZ = 1;
         this.mass = 1;
+        this.collision = true;
     }
 
     update(deltaTime) {

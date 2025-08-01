@@ -3,6 +3,7 @@ import { Camera } from './camera.js';
 import { Player } from './player.js';
 import { Floor } from './floor.js';
 import { Box } from './box.js';
+import { Door } from './door.js';
 import { setupSocket, getSocketId, onServerState } from './socket.js';
 
 const scene = new THREE.Scene();
@@ -13,11 +14,11 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.AmbientLight(0x404040, 0.1);
+const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
 scene.add(ambientLight);
 
 // Remove a DirectionalLight e usa SpotLight
-const spotLight = new THREE.SpotLight(0xffffff, 1);
+const spotLight = new THREE.SpotLight(0x00ff00, 1);
 spotLight.position.set(10, 1, 10);
 spotLight.target.position.set(0, 0, 0); // Para onde a luz aponta
 
@@ -67,6 +68,8 @@ onServerState(state => {
             } else if (obj.type === 'floor') {
                 gameObject = new Floor(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0xccaacc);
             } else if (obj.type === 'box') {
+                gameObject = new Box(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0x742724);
+            } else if (obj.type === 'door') {
                 gameObject = new Box(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0x742724);
             }
             

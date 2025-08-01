@@ -1,99 +1,66 @@
 import { Floor } from './floor.js';
-import { Box } from './box.js';
 
 export class Room {
-    constructor(id, x = 0, z = 0) {
+    constructor(id, sizeX, sizeZ) {
         this.id = id;
-        this.centerX = x;
-        this.centerZ = z;
-        
-        // Tamanho aleatório da sala (2 a 40)
-        this.width = this.randomBetween(2, 40);
-        this.depth = this.randomBetween(2, 40);
-        this.height = 1; // Altura do piso
-        
+        this.sizeX = sizeX;
+        this.sizeZ = sizeZ;
         this.objects = [];
-        this.generateRoom();
-    }
-    
-    randomBetween(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    
-    generateRoom() {
-        // Cria o piso da sala
-        this.createFloor();
+        this.isActive = false;
+        this.spawnX = 0; // Posição onde players aparecem ao entrar
+        this.spawnY = 1;
+        this.spawnZ = 0;
         
-        // Gera 5 caixas em posições aleatórias
-        this.generateBoxes(5);
+        this.createFloor();
     }
     
     createFloor() {
-        const floorId = `${this.id}_floor`;
         const floor = new Floor(
-            floorId,
-            this.centerX,
-            -this.height / 2, // Posição Y (centro do piso)
-            this.centerZ,
-            this.width,
-            this.height,
-            this.depth
+            `${this.id}_floor`,
+            0, -0.5, 0,
+            this.sizeX, 1, this.sizeZ
         );
-        
         this.objects.push(floor);
     }
     
-    generateBoxes(count) {
-        for (let i = 0; i < count; i++) {
-            // Posição aleatória dentro da sala (com margem nas bordas)
-            const margin = 2; // Margem das bordas
-            const maxX = (this.width / 2) - margin;
-            const maxZ = (this.depth / 2) - margin;
-            
-            const x = this.centerX + this.randomBetween(-maxX, maxX);
-            const z = this.centerZ + this.randomBetween(-maxZ, maxZ);
-            
-            // Tamanho aleatório da caixa
-            const sizeX = this.randomBetween(1, 3);
-            const sizeY = this.randomBetween(1, 4);
-            const sizeZ = this.randomBetween(1, 3);
-            
-            // Posição Y no topo do piso
-            const y = (this.height / 2) + (sizeY / 2);
-            
-            // Massa aleatória
-            const mass = Math.random() * 0.8 + 0.2; // Entre 0.2 e 1.0
-            
-            const boxId = `${this.id}_box_${i}`;
-            const box = new Box(boxId, x, y, z, sizeX, sizeY, sizeZ, mass);
-            
-            this.objects.push(box);
+    addObject(obj) {
+        this.objects.push(obj);
+    }
+    
+    activate(world, collisionSystem, gravitySystem) {
+        if (!this.isActive) {
+            this.objects.forEach(obj => {
+                world.addObject(obj);
+                collisionSystem.addObject(obj);
+                
+                if (obj.type === 'box') {
+                    gravitySystem.addObject(obj);
+                }
+            });
+            this.isActive = true;
+            console.log(`Sala ${this.id} ativada`);
         }
     }
     
-    // Retorna todos os objetos da sala
-    getObjects() {
-        return this.objects;
+    deactivate(world, collisionSystem, gravitySystem) {
+        if (this.isActive) {
+            this.objects.forEach(obj => {
+                world.removeObject(obj.id);
+                collisionSystem.removeObject(obj);
+                gravitySystem.removeObject(obj);
+            });
+            this.isActive = false;
+            console.log(`Sala ${this.id} desativada`);
+        }
     }
     
-    // Verifica se um ponto está dentro da sala
-    isPointInside(x, z) {
-        const halfWidth = this.width / 2;
-        const halfDepth = this.depth / 2;
-        
-        return (x >= this.centerX - halfWidth && x <= this.centerX + halfWidth &&
-                z >= this.centerZ - halfDepth && z <= this.centerZ + halfDepth);
+    setSpawnPoint(x, y, z) {
+        this.spawnX = x;
+        this.spawnY = y;
+        this.spawnZ = z;
     }
     
-    // Retorna informações da sala
-    getInfo() {
-        return {
-            id: this.id,
-            centerX: this.centerX,
-            centerZ: this.centerZ,
-            width: this.width,
-            depth: this.depth,
-            objectCount: this.objects.length
-        };
+    getSpawnPoint() {
+        return { x: this.spawnX, y: this.spawnY, z: this.spawnZ };
     }
 }

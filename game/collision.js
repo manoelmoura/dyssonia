@@ -211,7 +211,10 @@ export class CollisionSystem {
             
             // Resolve todas as colisões encontradas
             collisions.forEach(collision => {
-                this.resolveCollision(collision.obj1, collision.obj2);
+                if (collision.obj1.collision && collision.obj2.collision) {
+                    this.resolveCollision(collision.obj1, collision.obj2);
+                }
+                
             });
             
             iterations++;
@@ -223,5 +226,18 @@ export class CollisionSystem {
     // Limpa todos os objetos
     clear() {
         this.collidableObjects = [];
+    }
+
+    checkDoorCollisions(roomManager) {
+        const doors = this.collidableObjects.filter(obj => obj.type === 'door');
+        const players = this.collidableObjects.filter(obj => obj.type === 'player');
+        
+        players.forEach(player => {
+            doors.forEach(door => {
+                if (this.checkAABBCollision(player, door)) {
+                    door.onPlayerCollision(player, roomManager);
+                }
+            });
+        });
     }
 }
