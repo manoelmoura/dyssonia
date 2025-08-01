@@ -25,7 +25,7 @@ const gravitySystem = new GravitySystem();
 const roomManager = new RoomManager(world, collisionSystem, gravitySystem);
 const generator = new DungeonGenerator(roomManager);
 
-generator.generateDungeon(8);
+generator.generateDungeon(12);
 
 app.use(express.static('public'));
 
@@ -36,6 +36,9 @@ io.on('connection', (socket) => {
     world.addObject(player);
     collisionSystem.addObject(player);
     gravitySystem.addObject(player);
+    
+    // Adiciona o jogador à primeira sala disponível
+    roomManager.addPlayerToCurrentRoom(socket.id);
 
     socket.on('input', input => {
         const player = world.getObject(socket.id);
@@ -46,6 +49,12 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         world.removeObject(socket.id);
+        collisionSystem.removeObject(world.getObject(socket.id));
+        gravitySystem.removeObject(world.getObject(socket.id));
+        
+        // Remove o jogador do sistema de salas
+        roomManager.removePlayer(socket.id);
+        
         console.log('Player disconnected:', socket.id);
     });
 });
@@ -55,8 +64,17 @@ setInterval(() => {
     world.update(1/60);
     collisionSystem.update();
     collisionSystem.checkDoorCollisions(roomManager);
-    const state = world.getState();
-    io.emit('state', state);
+    io.sockets.sockets.forEach((socket) => {
+        const player = world.getObject(socket.id);
+        if (player) {
+            const visibleState = world.getStateNearPosition(
+                player.position.x, 
+                player.position.z, 
+                50 // raio de renderização
+            );
+            socket.emit('state', visibleState);
+        }
+    });
 }, 1000 / 60);
 
 const PORT = 3000;

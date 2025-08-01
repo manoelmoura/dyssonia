@@ -14,20 +14,39 @@ export class Door extends GameObject {
         this.targetRoomId = targetRoomId;
         this.connectedDoorId = connectedDoorId;
         this.cooldown = 0; // Evita spam de teleporte
+        this.playerCooldowns = new Map(); // Cooldown individual por jogador
     }
     
     onPlayerCollision(player, roomManager) {
-        if (this.cooldown <= 0) {
+        // Verifica cooldown individual do jogador
+        const playerCooldown = this.playerCooldowns.get(player.id) || 0;
+        
+        if (playerCooldown <= 0) {
             console.log(`Player ${player.id} usando porta para ${this.targetRoomId}, conectada com ${this.connectedDoorId}`);
-            roomManager.switchToRoomNearDoor(this.targetRoomId, this.connectedDoorId, [player.id]);
-            this.cooldown = 1; // 1 segundo de cooldown
+            
+            // Usa a nova função que move apenas este jogador específico
+            roomManager.movePlayerToRoom(player.id, this.targetRoomId, this.connectedDoorId);
+            
+            // Define cooldown individual para este jogador
+            this.playerCooldowns.set(player.id, 1); // 1 segundo de cooldown
         }
     }
     
     update(deltaTime) {
         super.update(deltaTime);
+        
+        // Atualiza cooldown global (mantido para compatibilidade)
         if (this.cooldown > 0) {
             this.cooldown -= deltaTime;
+        }
+        
+        // Atualiza cooldowns individuais dos jogadores
+        for (const [playerId, cooldown] of this.playerCooldowns.entries()) {
+            if (cooldown > 0) {
+                this.playerCooldowns.set(playerId, cooldown - deltaTime);
+            } else {
+                this.playerCooldowns.delete(playerId); // Remove cooldown expirado
+            }
         }
     }
 }

@@ -39,4 +39,27 @@ export class World {
         }
         return state;
     }
+
+    getStateNearPosition(centerX, centerZ, radius) {
+        const state = [];
+        for (const obj of this.objects.values()) {
+            const distance = Math.sqrt(
+                Math.pow(obj.position.x - centerX, 2) + 
+                Math.pow(obj.position.z - centerZ, 2)
+            );
+            
+            if (distance <= radius) {
+                state.push({
+                    id: obj.id,
+                    type: obj.type,
+                    position: obj.position,
+                    rotation: obj.rotation,
+                    sizeX: obj.sizeX,
+                    sizeY: obj.sizeY,
+                    sizeZ: obj.sizeZ
+                });
+            }
+        }
+        return state;
+    }
 }
