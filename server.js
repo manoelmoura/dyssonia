@@ -6,9 +6,10 @@ import { World } from './game/world.js';
 import { RoomManager } from './game/roomManager.js';
 import { Room } from './game/room.js';
 import { Door } from './game/door.js';
+import { DungeonGenerator } from './game/dungeonGenerator.js';
 
 import { Player } from './game/player.js';
-import { Floor } from './game/floor.js';
+import { Wall } from './game/wall.js';
 import { Box } from './game/box.js';
 
 import { CollisionSystem } from './game/collision.js';
@@ -22,28 +23,9 @@ const world = new World();
 const collisionSystem = new CollisionSystem();
 const gravitySystem = new GravitySystem();
 const roomManager = new RoomManager(world, collisionSystem, gravitySystem);
+const generator = new DungeonGenerator(roomManager);
 
-const sala1 = new Room('sala1', 10, 10);
-const box = new Box('box1', 3, 10, 3, 3, 1, 1.5, 0.1);
-sala1.addObject(box);
-const porta1a = new Door('porta1a', 2, 1, 1, 'sala2', 'porta2a');
-sala1.addObject(porta1a);
-
-const sala2 = new Room('sala2', 40, 40, world);
-const porta2a = new Door('porta2a', 10, 1, 10, 'sala1', 'porta1a')
-sala2.addObject(porta2a);
-const porta2b = new Door('porta2b', 10, 1, 0, 'sala3', 'porta3a')
-sala2.addObject(porta2b);
-
-const sala3 = new Room('sala3', 20, 50, world);
-const porta3a = new Door('porta3a', 0, 1, 20, 'sala2', 'porta2b')
-sala3.addObject(porta3a);
-
-roomManager.addRoom(sala1);
-roomManager.addRoom(sala2);
-roomManager.addRoom(sala3);
-
-roomManager.switchToRoom('sala1');
+generator.generateDungeon(8);
 
 app.use(express.static('public'));
 

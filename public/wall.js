@@ -4,10 +4,12 @@ export class Wall {
     constructor(id, sizeX, sizeY, sizeZ, color = 0x888888) {
         this.id = id;
         this.mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(sizeX, sizeY, sizeZ),
+            new THREE.PlaneGeometry(sizeX, sizeY),
             new THREE.MeshLambertMaterial({
                 color: color,
-                side: THREE.BackSide
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0
             })
         );
         this.mesh.castShadow = true;

@@ -5,6 +5,7 @@ import { Floor } from './floor.js';
 import { Box } from './box.js';
 import { Door } from './door.js';
 import { setupSocket, getSocketId, onServerState } from './socket.js';
+import { Wall } from './wall.js';
 
 const scene = new THREE.Scene();
 window.gameScene = scene;
@@ -70,7 +71,9 @@ onServerState(state => {
             } else if (obj.type === 'box') {
                 gameObject = new Box(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0x742724);
             } else if (obj.type === 'door') {
-                gameObject = new Box(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0x742724);
+                gameObject = new Door(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0x742724);
+            } else if (obj.type === 'wall') {
+                gameObject = new Wall(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0x742724);
             }
             
             if (gameObject) {

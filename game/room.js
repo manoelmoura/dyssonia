@@ -1,4 +1,5 @@
 import { Floor } from './floor.js';
+import { Wall } from './wall.js';
 
 export class Room {
     constructor(id, sizeX, sizeZ) {
@@ -12,6 +13,7 @@ export class Room {
         this.spawnZ = 0;
         
         this.createFloor();
+        this.createWalls();
     }
     
     createFloor() {
@@ -21,6 +23,43 @@ export class Room {
             this.sizeX, 1, this.sizeZ
         );
         this.objects.push(floor);
+    }
+    
+    createWalls() {
+        const wallHeight = 30; // Altura das paredes
+        const wallThickness = 0.2; // Espessura das paredes
+        
+        // Parede Norte (Z positivo)
+        const wallNorth = new Wall(
+            `${this.id}_wall_north`,
+            0, wallHeight/2, this.sizeZ/2,
+            this.sizeX, wallHeight, wallThickness
+        );
+        this.objects.push(wallNorth);
+        
+        // Parede Sul (Z negativo)
+        const wallSouth = new Wall(
+            `${this.id}_wall_south`,
+            0, wallHeight/2, -this.sizeZ/2,
+            this.sizeX, wallHeight, wallThickness
+        );
+        this.objects.push(wallSouth);
+        
+        // Parede Leste (X positivo)
+        const wallEast = new Wall(
+            `${this.id}_wall_east`,
+            this.sizeX/2, wallHeight/2, 0,
+            wallThickness, wallHeight, this.sizeZ
+        );
+        this.objects.push(wallEast);
+        
+        // Parede Oeste (X negativo)
+        const wallWest = new Wall(
+            `${this.id}_wall_west`,
+            -this.sizeX/2, wallHeight/2, 0,
+            wallThickness, wallHeight, this.sizeZ
+        );
+        this.objects.push(wallWest);
     }
     
     addObject(obj) {
