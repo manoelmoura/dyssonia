@@ -1,3 +1,5 @@
+import { Box } from "./box.js";
+
 export class RoomManager {
     constructor(world, collisionSystem, gravitySystem) {
         this.rooms = new Map();
@@ -6,11 +8,35 @@ export class RoomManager {
         this.world = world;
         this.collisionSystem = collisionSystem;
         this.gravitySystem = gravitySystem;
+
     }
     
     addRoom(room) {
         this.rooms.set(room.id, room);
         console.log(`Sala ${room.id} registrada`);
+    }
+
+    addBoxToRoom(roomId, x, y, z, sizeX = 1, sizeY = 1, sizeZ = 1, mass = 5) {
+        const room = this.rooms.get(roomId);
+        if (!room) {
+            console.error(`Sala ${roomId} não encontrada`);
+            return false;
+        }
+        
+        const boxId = `${roomId}_box_${Date.now()}`; // ID único baseado no timestamp
+        const box = new Box(boxId, x, y, z, sizeX, sizeY, sizeZ, mass);
+        
+        room.addObject(box);
+        
+        // Se a sala estiver ativa, adiciona a caixa aos sistemas
+        if (this.activeRooms.has(roomId)) {
+            this.world.addObject(box);
+            this.collisionSystem.addObject(box);
+            this.gravitySystem.addObject(box);
+        }
+        
+        console.log(`Caixa ${boxId} adicionada à sala ${roomId}`);
+        return box;
     }
     
     // Função original mantida para compatibilidade (quando todos devem ir juntos)

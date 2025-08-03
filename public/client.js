@@ -4,7 +4,7 @@ import { Player } from './player.js';
 import { Floor } from './floor.js';
 import { Box } from './box.js';
 import { Door } from './door.js';
-import { setupSocket, getSocketId, onServerState } from './socket.js';
+import { setupSocket, getSocketId, onServerState, keys } from './socket.js';
 import { Wall } from './wall.js';
 
 const scene = new THREE.Scene();
@@ -53,6 +53,16 @@ let cameraObj = null;
 
 setupSocket();
 
+// Controle da câmera (client-side)
+let lastPState = false;
+setInterval(() => {
+    const currentPState = keys['p'] || false;
+    if (currentPState && !lastPState && cameraObj) {
+        cameraObj.toggleCamera();
+    }
+    lastPState = currentPState;
+}, 1000 / 60);
+
 onServerState(state => {
     state.forEach(obj => {
         if (!gameObjects.has(obj.id)) {
@@ -64,7 +74,9 @@ onServerState(state => {
                 
                 if (obj.id === getSocketId()) {
                     localPlayer = gameObject;
+                    window.localPlayer = gameObject; // Torna acessível globalmente
                     cameraObj = new Camera(gameObject.getMesh());
+                    window.cameraObj = cameraObj; // Torna acessível globalmente para controles
                 }
             } else if (obj.type === 'floor') {
                 gameObject = new Floor(obj.id, obj.sizeX, obj.sizeY, obj.sizeZ, 0xccaacc);

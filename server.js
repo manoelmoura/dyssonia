@@ -4,13 +4,9 @@ import express from 'express';
 
 import { World } from './game/world.js';
 import { RoomManager } from './game/roomManager.js';
-import { Room } from './game/room.js';
-import { Door } from './game/door.js';
 import { DungeonGenerator } from './game/dungeonGenerator.js';
 
 import { Player } from './game/player.js';
-import { Wall } from './game/wall.js';
-import { Box } from './game/box.js';
 
 import { CollisionSystem } from './game/collision.js';
 import { GravitySystem } from './game/gravity.js';
@@ -26,6 +22,7 @@ const roomManager = new RoomManager(world, collisionSystem, gravitySystem);
 const generator = new DungeonGenerator(roomManager);
 
 generator.generateDungeon(12);
+roomManager.addBoxToRoom('room_0', 5, 3, 5, 2, 2, 2, 8);
 
 app.use(express.static('public'));
 
