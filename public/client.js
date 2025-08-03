@@ -15,7 +15,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+const ambientLight = new THREE.AmbientLight(0x404040, 1);
 scene.add(ambientLight);
 
 // Remove a DirectionalLight e usa SpotLight
@@ -42,10 +42,10 @@ scene.add(spotLight.target); // Importante adicionar o target também!
 
 // Helpers para visualizar
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(spotLightHelper);
+//scene.add(spotLightHelper);
 
 const shadowHelper = new THREE.CameraHelper(spotLight.shadow.camera);
-scene.add(shadowHelper);
+//scene.add(shadowHelper);
 
 const gameObjects = new Map();
 let localPlayer = null;
