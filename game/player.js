@@ -23,7 +23,7 @@ export class Player extends GameObject {
         this.velocity.z = (input.z || 0) * this.speed;
         
         if (input.jump && this.isGrounded(collisionSystem)) {
-            this.jump(10);
+            this.jump();
         }
     }
 

@@ -12,7 +12,7 @@ export class Player {
             new THREE.BoxGeometry(1, 1, 1),
             new THREE.MeshLambertMaterial({color: color})
         );
-        this.legsMesh.position.y = 0.5; // Centro do cubo das pernas (base em y=0, topo em y=1)
+        this.legsMesh.position.y = 0; // Centro do cubo das pernas (base em y=0, topo em y=1)
         this.legsMesh.castShadow = true;
         this.legsMesh.receiveShadow = true;
         
@@ -21,7 +21,7 @@ export class Player {
             new THREE.BoxGeometry(1, 1, 1),
             new THREE.MeshLambertMaterial({color: color})
         );
-        this.torsoMesh.position.y = 1.5; // Centro do cubo do torso (base em y=1, topo em y=2)
+        this.torsoMesh.position.y = 1; // Centro do cubo do torso (base em y=1, topo em y=2)
         this.torsoMesh.castShadow = true;
         this.torsoMesh.receiveShadow = true;
         
