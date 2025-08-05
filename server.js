@@ -25,6 +25,7 @@ generator.generateDungeon(12);
 roomManager.addBoxToRoom('room_0', 5, 3, 5, 2, 2, 2, 8);
 
 app.use(express.static('public'));
+app.use('/node_modules', express.static('node_modules'));
 
 io.on('connection', (socket) => {
     console.log('Player connected:', socket.id);
