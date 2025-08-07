@@ -1,4 +1,5 @@
-import * as THREE from '/node_modules/three/build/three.module.js';
+import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js"
+import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 export class Box {
     constructor(id, sizeX, sizeY, sizeZ, color = 0x472827) {
         this.id = id;
